@@ -12,8 +12,8 @@ import j from "../sentences/j.json";
 import k from "../sentences/k.json";
 import l from "../sentences/l.json";
 
-// 将一言类型映射到对应的 JSON 文件内容
-const sentencesMap = {
+// 静态本地导入
+const localSentencesMap = {
     "a": a,
     "b": b,
     "c": c,
@@ -27,6 +27,49 @@ const sentencesMap = {
     "k": k,
     "l": l,
 };
+
+// 动态获取字符集映射
+async function getSentencesMap(env) {
+    // 优先使用 Cloudflare 环境变量 CHARSET
+    if (env.CHARSET) {
+        try {
+            const charset = JSON.parse(env.CHARSET);
+            const entries = await Promise.all(
+                Object.entries(charset).map(async ([key, url]) => {
+                    try {
+                        const res = await fetch(url);
+                        if (!res.ok) throw new Error(`Fetch failed: ${url}`);
+                        const data = await res.json();
+                        return [key, data];
+                    } catch (e) {
+                        // fetch 失败 fallback 本地
+                        return [key, localSentencesMap[key] || []];
+                    }
+                })
+            );
+            return Object.fromEntries(entries);
+        } catch (e) {
+            // fallback 到默认远程
+        }
+    }
+    // 未定义 CHARSET，默认引用 jsdelivr 远程
+    const keys = Object.keys(localSentencesMap);
+    const entries = await Promise.all(
+        keys.map(async (key) => {
+            const url = `https://cdn.jsdelivr.net/gh/hitokoto-osc/sentences-bundle@master/sentences/${key}.json`;
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                return [key, data];
+            } catch (e) {
+                // fetch 失败 fallback 本地
+                return [key, localSentencesMap[key] || []];
+            }
+        })
+    );
+    return Object.fromEntries(entries);
+}
 
 // 通用响应标头
 const responseHeaders = {
@@ -104,6 +147,9 @@ export async function onRequest(context) {
         if (maxLength < minLength) {
             return createResponse(400, "max_length 不能小于 min_length");
         }
+
+        // 获取字符集映射（支持远程/本地/环境变量）
+        const sentencesMap = await getSentencesMap(env);
 
         let sentences = [];
 

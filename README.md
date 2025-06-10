@@ -3,11 +3,19 @@
 
 ## 使用方法
 1. 分叉此存储库。
-2. 部署到 Cloudflare Pages，不需要设置框架、环境变量等。
-3. 部署成功后直接访问即可，使用方法请参考 [一言开发者中心](https://developer.hitokoto.cn/sentence/)。
+2. 部署到 Cloudflare Pages。
+3. 可选：如需自定义句子来源，可在 Cloudflare Pages 的环境变量中设置 `CHARSET`，格式为 JSON 字符串，例如：
+   ```json
+   {
+     "a": "https://example.com/a.json",
+     "b": "https://example.com/b.json"
+   }
+   ```
+   这样可自定义各类别句子的来源（URL）。未设置时，默认自动引用 [hitokoto-osc/sentences-bundle](https://github.com/hitokoto-osc/sentences-bundle) 官方仓库的远程 json 文件。
+4. 部署成功后直接访问即可，使用方法请参考 [一言开发者中心](https://developer.hitokoto.cn/sentence/)。
 
-## 待完成
-- [ ] 支持指定返回字符集
+## 已支持特性
+- [x] 支持指定返回字符集（通过 Cloudflare 环境变量 `CHARSET` 或自动引用官方远程 json）
 - [x] 支持指定返回句子的长度筛选
 
 ## 声明
