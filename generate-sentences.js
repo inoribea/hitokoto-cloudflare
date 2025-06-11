@@ -39,7 +39,7 @@ async function generateSentencesJson() {
                         uuid: uuidv4(),
                         hitokoto: hitokoto,
                         type: "z",
-                        from: "custom",
+                        from: "inoribea",
                         from_who: "inoribea",
                         creator: "inoribea",
                         creator_uid: "script-generated",
