@@ -119,7 +119,7 @@ export default {
         }
 
         const url = new URL(request.url); // 获取请求的 URL
-        const categoryKey = url.searchParams.get("c"); // 从 URL 中获取 c 参数，一言类型
+        const categoryKeysParam = url.searchParams.get("c"); // 从 URL 中获取 c 参数，一言类型，可能包含多个
         const encodeType = url.searchParams.get("encode"); // 从 URL 中获取 encode 参数，返回编码
         const callback = url.searchParams.get("callback"); // 从 URL 中获取 callback 参数，调用的异步函数
         const select = url.searchParams.get("select"); // 从 URL 中获取 select 参数，选择器。配合 encode=js 使用
@@ -151,41 +151,51 @@ export default {
         const sentencesMap = await getSentencesMap(env);
 
         let sentences = [];
+        let categoryKeys = [];
 
-        // 如果有 categoryKey 并且该类别存在，则使用对应类别的一言
-        if (categoryKey) {
-            sentences = sentencesMap[categoryKey] || sentencesMap["a"]; // 如果没有该类别，默认使用 a 类别
-        } else {
-            // 如果没有提供 categoryKey，则随机选择一个类别
-            const keys = Object.keys(sentencesMap);
-            const randomKey = keys[Math.floor(Math.random() * keys.length)];
-            sentences = sentencesMap[randomKey];
+        if (categoryKeysParam) {
+            categoryKeys = categoryKeysParam.split(',').map(key => key.trim()).filter(key => key.length > 0);
         }
 
-        // 如果有 minLength 或 maxLength 参数，进行长度筛选
-        if (minLength || maxLength) {
-            // 如果有 categoryKey，则仅筛选该类别的一言
-            if (categoryKey) {
-                sentences = sentencesMap[categoryKey] || [];
-            } else {
-                // 如果没有 categoryKey，则聚合所有一言的集合
+        if (categoryKeys.length > 0) {
+            // 如果有 categoryKeys，则聚合所有指定类别的一言
+            for (const key of categoryKeys) {
+                if (sentencesMap[key]) {
+                    sentences = sentences.concat(sentencesMap[key]);
+                }
+            }
+            // 如果指定类别中没有找到任何一言，则默认使用 'a' 类别
+            if (sentences.length === 0) {
+                sentences = sentencesMap["a"] || [];
+            }
+        } else {
+            // 如果没有提供 categoryKeys，则随机选择一个类别
+            const keys = Object.keys(sentencesMap);
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            sentences = sentencesMap[randomKey] || [];
+        }
+
+        // 如果有 min_length 或 max_length 参数，进行长度筛选
+        if (url.searchParams.has("min_length") || url.searchParams.has("max_length")) {
+            // 如果当前 sentences 数组为空，则聚合所有一言进行筛选
+            if (sentences.length === 0) {
                 sentences = Object.values(sentencesMap).flat();
             }
 
-            // 过滤不符合 min_length 和 max_length 条件的一言
             sentences = sentences.filter(sentence => {
                 const isMinLengthValid = !minLength || sentence.length >= minLength;
                 const isMaxLengthValid = !maxLength || sentence.length <= maxLength;
                 return isMinLengthValid && isMaxLengthValid;
             });
 
-            // 如果没有符合条件的一言，返回提示信息
             if (sentences.length === 0) {
-                if (categoryKey) {
-                    return createResponse(404, "没有在该类别找到符合长度条件的一言");
-                }
                 return createResponse(404, "没有找到符合长度条件的一言");
             }
+        }
+
+        // 如果经过所有处理后 sentences 仍然为空，则返回错误
+        if (sentences.length === 0) {
+            return createResponse(404, "没有找到任何一言");
         }
 
         // 从选中的分类中随机选择一条一言
