@@ -106,10 +106,9 @@ function handleError(code, error, devEnv, customMessage = "服务器内部错误
     }
 }
 
-export async function onRequest(context) {
-    const { request, env } = context;
-
-    try {
+export default {
+    async fetch(request, env, ctx) {
+        try {
         // 处理 OPTIONS 请求
         if (request.method === "OPTIONS") {
             return new Response(null, {
@@ -266,4 +265,5 @@ export async function onRequest(context) {
         console.error("Unexpected error:", error);
         return handleError(500, error, env.DEV_ENV);
     }
-}
+    }
+};
