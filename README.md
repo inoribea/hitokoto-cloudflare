@@ -7,7 +7,7 @@
 3. **自定义本地句子：**
    - 在项目根目录创建 `.tmp` 文件（例如 `hitokoto.tmp`）。
    - 在 `.tmp` 文件中，每行写入一句一言内容。
-   - 运行 `node generate-sentences.js` 脚本，它会将 `.tmp` 文件转换为 `sentences/` 目录下的 JSON 文件，并自动被 API 引用。
+   - 运行 `node generate-sentences.js` 脚本，它会将项目根目录下的所有 `.tmp` 文件转换为 `sentences/` 目录下的 JSON 文件，并自动聚合所有本地句子数据到 `sentences/index.js`，API 将自动引用此聚合文件。
 4. **自定义远程句子来源（可选）：**
    - 在 Cloudflare Pages 的环境变量中设置 `CHARSET`。
    - `CHARSET` 可以是 JSON 字符串，支持两种格式：
@@ -34,6 +34,7 @@
 - [x] 支持指定返回字符集（通过 Cloudflare 环境变量 `CHARSET` 或自动引用官方远程 json）
 - [x] 支持指定返回句子的长度筛选（`min_length` 和 `max_length` 参数）
 - [x] 支持自定义本地句子文件（通过 `generate-sentences.js` 脚本）
+- [x] 支持本地句子文件的自动聚合
 - [x] `CHARSET` 环境变量支持 URL 数组作为远程句子来源
 - [x] 支持 `encode=js` 参数，可将一言内容直接注入到指定 DOM 元素（配合 `select` 参数）
 

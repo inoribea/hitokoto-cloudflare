@@ -56,9 +56,39 @@ async function generateSentencesJson() {
                 console.error(`Error processing ${tmpFile}:`, error);
             }
         }
+        await aggregateSentences(); // 调用聚合函数
     } catch (error) {
         console.error("Error in generateSentencesJson:", error);
     }
 }
 
-generateSentencesJson();
+async function aggregateSentences() {
+    const aggregatedData = {};
+    try {
+        const jsonFiles = fs.readdirSync(sentencesDir).filter(file => file.endsWith('.json'));
+
+        for (const file of jsonFiles) {
+            const filePath = path.join(sentencesDir, file);
+            const key = file.replace(/\.json$/, '');
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                aggregatedData[key] = JSON.parse(data);
+            } catch (error) {
+                console.error(`Error reading or parsing ${file}:`, error);
+            }
+        }
+
+        const outputPath = path.join(sentencesDir, 'index.js');
+        const content = `export default ${JSON.stringify(aggregatedData, null, 2)};\n`;
+        fs.writeFileSync(outputPath, content, 'utf8');
+        console.log(`Successfully aggregated all sentences into ${outputPath}.`);
+    } catch (error) {
+        console.error("Error in aggregateSentences:", error);
+    }
+}
+
+generateSentencesJson().then(() => {
+    console.log("Sentence generation and aggregation complete.");
+}).catch(error => {
+    console.error("An error occurred during sentence processing:", error);
+});

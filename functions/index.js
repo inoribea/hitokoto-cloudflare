@@ -1,32 +1,5 @@
-// 逐个导入 sentences 目录下的各个 JSON 文件
-import a from "../sentences/a.json";
-import b from "../sentences/b.json";
-import c from "../sentences/c.json";
-import d from "../sentences/d.json";
-import e from "../sentences/e.json";
-import f from "../sentences/f.json";
-import g from "../sentences/g.json";
-import h from "../sentences/h.json";
-import i from "../sentences/i.json";
-import j from "../sentences/j.json";
-import k from "../sentences/k.json";
-import l from "../sentences/l.json";
-
-// 静态本地导入
-const localSentencesMap = {
-    "a": a,
-    "b": b,
-    "c": c,
-    "d": d,
-    "e": e,
-    "f": f,
-    "g": g,
-    "h": h,
-    "i": i,
-    "j": j,
-    "k": k,
-    "l": l,
-};
+// 导入聚合的本地一言数据
+import localSentencesMap from "../sentences/index.js";
 
 // 动态获取字符集映射
 async function getSentencesMap(env) {
