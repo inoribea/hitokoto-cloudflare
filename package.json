@@ -2,5 +2,8 @@
   "type": "module",
   "devDependencies": {
     "eslint": "^9.18.0"
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
   }
 }

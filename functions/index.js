@@ -33,23 +33,52 @@ async function getSentencesMap(env) {
     // 优先使用 Cloudflare 环境变量 CHARSET
     if (env.CHARSET) {
         try {
-            const charset = JSON.parse(env.CHARSET);
-            const entries = await Promise.all(
-                Object.entries(charset).map(async ([key, url]) => {
-                    try {
-                        const res = await fetch(url);
-                        if (!res.ok) throw new Error(`Fetch failed: ${url}`);
-                        const data = await res.json();
-                        return [key, data];
-                    } catch (e) {
-                        // fetch 失败 fallback 本地
-                        return [key, localSentencesMap[key] || []];
-                    }
-                })
-            );
-            return Object.fromEntries(entries);
+            const parsedCharset = JSON.parse(env.CHARSET);
+            let resultEntries = [];
+
+            // 如果 CHARSET 是一个数组，假设它是一个 URL 列表
+            if (Array.isArray(parsedCharset)) {
+                resultEntries = await Promise.all(
+                    parsedCharset.map(async (url) => {
+                        // 从 URL 中提取文件名作为 key (例如: a.json -> a)
+                        const urlObj = new URL(url);
+                        const filename = urlObj.pathname.split('/').pop();
+                        const key = filename ? filename.replace(/\.json$/i, '') : '';
+
+                        try {
+                            const res = await fetch(url);
+                            if (!res.ok) throw new Error(`Fetch failed: ${url}`);
+                            const data = await res.json();
+                            return [key, data];
+                        } catch (e) {
+                            // fetch 失败 fallback 本地
+                            return [key, localSentencesMap[key] || []];
+                        }
+                    })
+                );
+            } else if (typeof parsedCharset === 'object' && parsedCharset !== null) {
+                // 如果 CHARSET 是一个对象，保持现有逻辑（键值对映射）
+                resultEntries = await Promise.all(
+                    Object.entries(parsedCharset).map(async ([key, url]) => {
+                        try {
+                            const res = await fetch(url);
+                            if (!res.ok) throw new Error(`Fetch failed: ${url}`);
+                            const data = await res.json();
+                            return [key, data];
+                        } catch (e) {
+                            // fetch 失败 fallback 本地
+                            return [key, localSentencesMap[key] || []];
+                        }
+                    })
+                );
+            } else {
+                // 如果格式无效，抛出错误，并最终回退到默认远程
+                throw new Error("Invalid CHARSET format. Must be a JSON array (URL list) or JSON object.");
+            }
+            return Object.fromEntries(resultEntries);
         } catch (e) {
-            // fallback 到默认远程
+            console.error("Error parsing or fetching CHARSET:", e);
+            // 捕获错误后，继续执行到函数末尾，回退到默认远程
         }
     }
     // 未定义 CHARSET，默认引用 jsdelivr 远程
