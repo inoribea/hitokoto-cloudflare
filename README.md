@@ -11,22 +11,22 @@
 4. **自定义远程句子来源（可选）：**
    - 在 Cloudflare Pages 的环境变量中设置 `CHARSET`。
    - `CHARSET` 可以是 JSON 字符串，支持两种格式：
-     - **URL 映射对象：**
+     - **URL 映射对象（键值对）：**
        ```json
        {
-         "a": "https://example.com/a.json",
-         "b": "https://example.com/b.json"
+         "a": "https://cdn.jsdelivr.net/gh/your-username/your-repo@master/sentences/a.json",
+         "b": "https://cdn.jsdelivr.net/gh/your-username/your-repo@master/sentences/b.json"
        }
        ```
-       这样可自定义各类别句子的来源（URL）。
+       这样可自定义各类别句子的来源（URL）。请注意，这里需要提供完整的 JSON 文件 URL，不支持模板字符串（如 `${key}`）。
      - **URL 数组：**
        ```json
        [
-         "https://example.com/a.json",
-         "https://example.com/b.json"
+         "https://cdn.jsdelivr.net/gh/your-username/your-repo@master/sentences/a.json",
+         "https://cdn.jsdelivr.net/gh/your-username/your-repo@master/sentences/b.json"
        ]
        ```
-       API 将从这些 URL 获取句子数据，并根据文件名（例如 `a.json` 对应 `a` 类别）自动识别类别。
+       API 将从这些 URL 获取句子数据，并根据文件名（例如 `a.json` 对应 `a` 类别）自动识别类别。同样，这里也需要提供完整的 JSON 文件 URL。
    - 未设置 `CHARSET` 时，默认自动引用 [hitokoto-osc/sentences-bundle](https://github.com/hitokoto-osc/sentences-bundle) 官方仓库的远程 json 文件。
 5. 部署成功后直接访问即可，使用方法请参考 [一言开发者中心](https://developer.hitokoto.cn/sentence/)。
 
