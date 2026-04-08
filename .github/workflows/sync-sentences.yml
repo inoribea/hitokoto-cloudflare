@@ -1,0 +1,57 @@
+name: Sync Sentences from Origin
+
+on:
+  schedule:
+    # 每周一凌晨 2 点执行 (UTC 时间)
+    - cron: '0 2 * * 1'
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          fi
+      
+      - name: Sync sentences from origin
+        run: node scripts/sync-from-origin.js
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet sentences/ || echo "has_changes=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add sentences/
+          git commit -m "chore: sync sentences from origin [skip ci]"
+          git push
+      
+      - name: Summary
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "✅ Sentences synced successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "New sentences have been added to sentences/z.json" >> $GITHUB_STEP_SUMMARY
+      
+      - name: No changes
+        if: steps.check_changes.outputs.has_changes != 'true'
+        run: |
+          echo "ℹ️ No new sentences to sync" >> $GITHUB_STEP_SUMMARY
