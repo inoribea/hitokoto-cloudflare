@@ -14,7 +14,6 @@ Annihilated righteous, regenerating hypocrite
 如情人般争执，抱无望赴墟归
 腐萤哺茧，化蝶切风
 鱼鳞月，层峦似栏龛，天锁结，节节渍浊心
-鱼鳞月，层峦似栏龛。天锁结，节节渍浊心
 窥得寒芒迫三秋，雸凩雫凪兆千愁
 日攀格桑，衔风凛航
 人生如梭，罄竹续歌
@@ -29,7 +28,6 @@ Annihilated righteous, regenerating hypocrite
 镂心悖爻，渚岸邯郸。
 萌之昭昭，克己天桓。
 不言则真，口言难实，否言为信，胤言皆谣
-不言则真，口言难实。否言为信，胤言皆谣
 Macro optimism， micro hustle
 晦明犹衡，量纲何常
 赭衣搏荆，錆牙恸鸣
